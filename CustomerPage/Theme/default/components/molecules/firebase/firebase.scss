@@ -1,0 +1,28 @@
+.login-tabs__panel {
+    display: none;
+    padding: 20px;
+    border: 1px solid #eee;
+    border-top: none;
+}
+
+.login-tabs__panel.is-active {
+    display: block;
+}
+
+.login-tabs__nav {
+    display: flex;
+    border-bottom: 1px solid #eee;
+}
+
+.login-tabs__nav-item {
+    padding: 15px 30px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+}
+
+.login-tabs__nav-item.is-active {
+    border-color: #007bff;
+    font-weight: bold;
+}

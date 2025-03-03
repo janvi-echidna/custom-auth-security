@@ -1,19 +1,9 @@
+{# Updated Twig template #}
+
 {% extends template('page-layout-main') %}
 
 {% block pageInfo %}
-    <div class="page-info">
-        <div class="container">
-            {% block breadcrumbs %}
-                {% include molecule('breadcrumb') with {
-                    data: {
-                        steps: [{
-                            label: 'customer.login' | trans
-                        }],
-                    },
-                } only %}
-            {% endblock %}
-        </div>
-    </div>
+
 {% endblock %}
 
 {% block content %}
@@ -25,26 +15,120 @@
         modifiers: ['center', 'last', 'mobile-center'],
     } only %}
         {% block inner %}
-            {% include molecule('form') with {
-                class: 'box',
-                data: {
-                    form: _view.loginForm,
-                    shouldRequireMessage: true,
-                    submit: {
-                        enable: true,
-                        class: 'button button--big form__action--primary',
-                        text: 'forms.submit.login' | trans,
-                    },
-                    cancel: {
-                        enable: true,
-                        url: url('password/forgotten'),
-                        text: 'forms.forgot-password' | trans,
-                        icon: null,
-                        class: 'link link--action form__action--link',
-                        qa: 'customer-forgot-password-link',
-                    },
-                },
-            } only %}
+            <div class="login-tabs">
+                <div class="login-tabs__nav">
+                    <button class="login-tabs__nav-item is-active" data-target="#email-login">{{ 'Email Login' | trans }}</button>
+                    <button class="login-tabs__nav-item" data-target="#gmail-login">{{ 'Gmail Login' | trans }}</button>
+                </div>
+                
+                <div class="login-tabs__content">
+                    <!-- Email Login Tab -->
+                        <div class="login-tabs__panel is-active" id="email-login">
+                        {% include molecule('form') with {
+                            class: 'box',
+                            data: {
+                                form: _view.loginForm,
+                                shouldRequireMessage: true,
+                                submit: {
+                                    enable: true,
+                                    class: 'button button--big form__action--primary',
+                                    text: 'forms.submit.login' | trans,
+                                },
+                                cancel: {
+                                    enable: true,
+                                    url: url('password/forgotten'),
+                                    text: 'forms.forgot-password' | trans,
+                                    class: 'link link--action form__action--link',
+                                    qa: 'customer-forgot-password-link',
+                                },
+                            },
+                        } only %}
+                    </div>
+
+                    <!-- Gmail Login Tab -->
+                    <div class="login-tabs__panel" id="gmail-login">
+                        <div class="form__field col col--sm-12">
+                        <div class="symfony_form" style="display:none;">
+                            {% include molecule('form') with {
+                                    class: 'box',
+                                    data: {
+                                        form: _view.mobileLoginForm,
+                                        shouldRequireMessage: true,
+                                        submit: {
+                                            enable: true,
+                                            class: 'button button--big form__action--primary',
+                                            text: 'forms.submit.login' | trans,
+                                        }
+                                    },
+                                } only %}
+                            </div>
+                            <button id="gmail-signin" class="button button--big form__action--primary">
+                                Sign in with Gmail
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% include molecule('firebase', 'CustomerPage') only %}
         {% endblock %}
     {% endembed %}
+{% endblock %}
+
+{% block footerJs %}
+    <script>
+        // Initialize Firebase
+        import { initializeApp } from "firebase/app";
+        import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCYdMl2RLYeKEDJMmHMJ-opMm3qk9MSia4",
+            authDomain: "sprykerauth.firebaseapp.com",
+            projectId: "sprykerauth",
+            storageBucket: "sprykerauth.appspot.com",
+            messagingSenderId: "1077909412616",
+            appId: "1:1077909412616:web:4c74e3a1fe8748efe72abd"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        // Gmail Sign-in Handler
+        document.getElementById('gmail-signin').addEventListener('click', handleGmailSignIn);
+
+        async function handleGmailSignIn() {
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+                
+                // Handle successful login
+                console.log('Gmail login successful:', user);
+                alert('Successfully logged in with Gmail!');
+                
+                // Here you would typically send the auth token to your backend
+                // and handle the Spryker session creation
+                
+            } catch (error) {
+                console.error('Gmail login error:', error);
+                alert('Gmail login failed. Please try again.');
+            }
+        }
+
+        // Tab Switching Logic
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.login-tabs__nav-item').forEach(tab => {
+                tab.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    document.querySelectorAll('.login-tabs__nav-item, .login-tabs__panel').forEach(el => {
+                        el.classList.remove('is-active');
+                    });
+
+                    this.classList.add('is-active');
+                    const target = document.querySelector(this.dataset.target);
+                    if (target) target.classList.add('is-active');
+                });
+            });
+        });
+    </script>
 {% endblock %}

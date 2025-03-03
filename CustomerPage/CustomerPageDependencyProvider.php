@@ -26,6 +26,10 @@ class CustomerPageDependencyProvider extends SprykerShopCustomerPageDependencyPr
      * @var string
      */
     public const CLIENT_SESSION = 'CLIENT_SESSION';
+    /**
+     * @var string
+     */
+    public const CUSTOMER_CLIENT_PAGE= 'CUSTOMER_CLIENT_PAGE';
 
     /**
      * @param \Spryker\Yves\Kernel\Container $container
@@ -37,6 +41,16 @@ class CustomerPageDependencyProvider extends SprykerShopCustomerPageDependencyPr
         $container = parent::provideDependencies($container);
 
         $container = $this->addSessionClient($container);
+        $container = $this->addCustomerPageClient($container);
+
+        return $container;
+    }
+
+    public function addCustomerPageClient(Container $container): Container
+    {
+        $container->set(static::CUSTOMER_CLIENT_PAGE, function (Container $container) {
+            return $container->getLocator()->customer()->client();
+        });
 
         return $container;
     }
